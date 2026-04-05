@@ -1000,12 +1000,25 @@ describe('messages2', function()
     ]])
     command('hi VisualNC') -- cursor moved to last message in pager
     screen:expect([[
-                                                           |
+                                                            |
       {1:~                                                    }|*9
       {3:                                                     }|
       VisualNC       xxx cleared                           |
       ^VisualNC       xxx cleared                        {4:bar}|
       foo                                                  |
     ]])
+  end)
+
+  it('ruler with winhighlight does not crash #38760', function()
+    local win_opts = { relative = 'editor', row = 1, col = 1, width = 20, height = 5 }
+    api.nvim_open_win(0, true, win_opts)
+    command('hi! link MsgArea Normal')
+    command('setlocal winhighlight=Normal:WarningMsg')
+    screen:expect({ [[
+      {1:~                                                    }|*12
+      {3:                                                     }|
+      {13:^[No Name] [+]                                     }|
+                                          1,1           All|
+    ]] })
   end)
 end)

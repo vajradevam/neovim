@@ -192,8 +192,8 @@ void stl_fill_click_defs(StlClickDefinition *click_defs, StlClickRecord *click_r
     }
     buf = click_recs[i].start;
     cur_click_def = click_recs[i].def;
-    if (!tabline && !(cur_click_def.type == kStlClickDisabled
-                      || cur_click_def.type == kStlClickFuncRun)) {
+    if (!tabline
+        && !(cur_click_def.type == kStlClickDisabled || cur_click_def.type == kStlClickFuncRun)) {
       // window bar and status line only support click functions
       cur_click_def.type = kStlClickDisabled;
     }
@@ -266,8 +266,8 @@ static void win_redr_custom(win_T *wp, bool draw_winbar, bool draw_ruler, bool u
     attr = win_hl_attr(wp, (int)group);
     maxwidth = wp->w_view_width;
     stl_clear_click_defs(wp->w_winbar_click_defs, wp->w_winbar_click_defs_size);
-    wp->w_winbar_click_defs = stl_alloc_click_defs(wp->w_winbar_click_defs, maxwidth,
-                                                   &wp->w_winbar_click_defs_size);
+    wp->w_winbar_click_defs
+      = stl_alloc_click_defs(wp->w_winbar_click_defs, maxwidth, &wp->w_winbar_click_defs_size);
   } else {
     const bool in_status_line = wp->w_status_height != 0 || is_stl_global;
     if (wp->w_floating && !is_stl_global && !draw_ruler) {
@@ -280,8 +280,8 @@ static void win_redr_custom(win_T *wp, bool draw_winbar, bool draw_ruler, bool u
     }
     fillchar = fillchar_status(&group, wp);
     stl_clear_click_defs(wp->w_status_click_defs, wp->w_status_click_defs_size);
-    wp->w_status_click_defs = stl_alloc_click_defs(wp->w_status_click_defs, maxwidth,
-                                                   &wp->w_status_click_defs_size);
+    wp->w_status_click_defs
+      = stl_alloc_click_defs(wp->w_status_click_defs, maxwidth, &wp->w_status_click_defs_size);
 
     if (draw_ruler) {
       stl = p_ruf;
@@ -334,8 +334,8 @@ static void win_redr_custom(win_T *wp, bool draw_winbar, bool draw_ruler, bool u
   // Make a copy, because the statusline may include a function call that
   // might change the option value and free the memory.
   stl = xstrdup(stl);
-  build_stl_str_hl(ewp, buf, sizeof(buf), stl, opt_idx, opt_scope,
-                   fillchar, maxwidth, &hltab, NULL, &tabtab, NULL);
+  build_stl_str_hl(ewp, buf, sizeof(buf), stl, opt_idx, opt_scope, fillchar, maxwidth, &hltab, NULL,
+                   &tabtab, NULL);
 
   xfree(stl);
   ewp->w_p_crb = p_crb_save;
@@ -381,8 +381,8 @@ static void win_redr_custom(win_T *wp, bool draw_winbar, bool draw_ruler, bool u
       }
       curgroup = -sp->userhl;
     } else {
-      int *userhl = (wp != NULL && wp != curwin && wp->w_status_height != 0)
-                    ? highlight_stlnc : highlight_user;
+      int *userhl = (wp != NULL && wp != curwin && wp->w_status_height != 0) ? highlight_stlnc
+                                                                             : highlight_user;
       char userbuf[5] = "User";
       userbuf[4] = (char)sp->userhl + '0';
       curattr = userhl[sp->userhl - 1];
@@ -408,9 +408,9 @@ static void win_redr_custom(win_T *wp, bool draw_winbar, bool draw_ruler, bool u
 
   // Fill the tab_page_click_defs, w_status_click_defs or w_winbar_click_defs array for clicking
   // in the tab page line, status line or window bar
-  StlClickDefinition *click_defs = (wp == NULL) ? tab_page_click_defs
-                                                : draw_winbar ? wp->w_winbar_click_defs
-                                                              : wp->w_status_click_defs;
+  StlClickDefinition *click_defs = (wp == NULL)  ? tab_page_click_defs
+                                   : draw_winbar ? wp->w_winbar_click_defs
+                                                 : wp->w_status_click_defs;
 
   stl_fill_click_defs(click_defs, tabtab, buf, maxwidth, wp == NULL);
 
@@ -479,7 +479,7 @@ void redraw_ruler(void)
   int off = wp->w_status_height ? wp->w_wincol : 0;
   int width = wp->w_status_height ? wp->w_width : Columns;
   schar_T fillchar = part_of_status ? fillchar_status(&group, wp) : schar_from_ascii(' ');
-  int attr = win_hl_attr(wp, (int)group);
+  int attr = part_of_status ? win_hl_attr(wp, (int)group) : HL_ATTR(HLF_MSG);
 
   // In list mode virtcol needs to be recomputed
   colnr_T virtcol = wp->w_virtcol;
@@ -490,8 +490,8 @@ void redraw_ruler(void)
   }
 
   // Check if not in Insert mode and the line is empty (will show "0-1").
-  int empty_line = (State & MODE_INSERT) == 0
-                   && *ml_get_buf(wp->w_buffer, wp->w_cursor.lnum) == NUL;
+  int empty_line
+    = (State & MODE_INSERT) == 0 && *ml_get_buf(wp->w_buffer, wp->w_cursor.lnum) == NUL;
 
 #define RULER_BUF_LEN 70
   char buffer[RULER_BUF_LEN];
@@ -499,13 +499,11 @@ void redraw_ruler(void)
   // row number, column number is appended
   // l10n: leave as-is unless a space after the comma is preferred
   // l10n: do not add any row/column label, due to the limited space
-  int bufferlen = vim_snprintf(buffer, RULER_BUF_LEN, _("%" PRId64 ","),
-                               (wp->w_buffer->b_ml.ml_flags & ML_EMPTY)
-                               ? 0
-                               : (int64_t)wp->w_cursor.lnum);
+  int bufferlen
+    = vim_snprintf(buffer, RULER_BUF_LEN, _("%" PRId64 ","),
+                   (wp->w_buffer->b_ml.ml_flags & ML_EMPTY) ? 0 : (int64_t)wp->w_cursor.lnum);
   bufferlen += col_print(buffer + bufferlen, RULER_BUF_LEN - (size_t)bufferlen,
-                         empty_line ? 0 : (int)wp->w_cursor.col + 1,
-                         (int)virtcol + 1);
+                         empty_line ? 0 : (int)wp->w_cursor.col + 1, (int)virtcol + 1);
 
   // Add a "50%" if there is room for it.
   // On the last line, don't print in the last column (scrolls the
@@ -524,13 +522,11 @@ void redraw_ruler(void)
   this_ru_col = MAX(this_ru_col, n2);
   if (this_ru_col + n1 < width) {
     // need at least space for rel_pos + NUL
-    while (this_ru_col + n1 < width
-           && RULER_BUF_LEN > bufferlen + rel_poslen + 1) {  // +1 for NUL
+    while (this_ru_col + n1 < width && RULER_BUF_LEN > bufferlen + rel_poslen + 1) {  // +1 for NUL
       bufferlen += (int)schar_get(buffer + bufferlen, fillchar);
       n1++;
     }
-    bufferlen += vim_snprintf(buffer + bufferlen, RULER_BUF_LEN - (size_t)bufferlen,
-                              "%s", rel_pos);
+    bufferlen += vim_snprintf(buffer + bufferlen, RULER_BUF_LEN - (size_t)bufferlen, "%s", rel_pos);
   }
   (void)bufferlen;
 
@@ -731,8 +727,7 @@ void draw_tabline(void)
           if (col + len >= Columns - 3) {
             break;
           }
-          grid_line_puts(col, NameBuff, len,
-                         hl_combine_attr(attr, win_hl_attr(cwp, HLF_T)));
+          grid_line_puts(col, NameBuff, len, hl_combine_attr(attr, win_hl_attr(cwp, HLF_T)));
           col += len;
         }
         if (modified) {
@@ -764,7 +759,7 @@ void draw_tabline(void)
       // jump_to_mouse() knows where each one is.
       tabcount++;
       while (scol < col) {
-        tab_page_click_defs[scol++] = (StlClickDefinition) {
+        tab_page_click_defs[scol++] = (StlClickDefinition){
           .type = kStlClickTabSwitch,
           .tabnr = tabcount,
           .func = NULL,
@@ -775,7 +770,7 @@ void draw_tabline(void)
     for (int scol = col; scol < Columns; scol++) {
       // Use 0 as tabpage number here, so that double-click opens a tabpage
       // after the last one, and single-click goes to the next tabpage.
-      tab_page_click_defs[scol] = (StlClickDefinition) {
+      tab_page_click_defs[scol] = (StlClickDefinition){
         .type = kStlClickTabSwitch,
         .tabnr = 0,
         .func = NULL,
@@ -791,15 +786,14 @@ void draw_tabline(void)
       const int sc_width = MIN(10, n);
 
       if (sc_width > 0) {
-        grid_line_puts(Columns - sc_width - (tabcount > 1) * 2,
-                       showcmd_buf, sc_width, attr_nosel);
+        grid_line_puts(Columns - sc_width - (tabcount > 1) * 2, showcmd_buf, sc_width, attr_nosel);
       }
     }
 
     // Put an "X" for closing the current tab if there are several.
     if (tabcount > 1) {
       grid_line_put_schar(Columns - 1, schar_from_ascii('X'), attr_nosel);
-      tab_page_click_defs[Columns - 1] = (StlClickDefinition) {
+      tab_page_click_defs[Columns - 1] = (StlClickDefinition){
         .type = kStlClickTabClose,
         .tabnr = 999,
         .func = NULL,
@@ -831,14 +825,14 @@ int build_statuscol_str(win_T *wp, linenr_T lnum, linenr_T relnum, char *buf, st
 
   StlClickRecord *clickrec;
   char *stc = xstrdup(wp->w_p_stc);
-  int width = build_stl_str_hl(wp, buf, MAXPATHL, stc, kOptStatuscolumn, OPT_LOCAL, 0,
-                               stcp->width, &stcp->hlrec, NULL, fillclick ? &clickrec : NULL, stcp);
+  int width = build_stl_str_hl(wp, buf, MAXPATHL, stc, kOptStatuscolumn, OPT_LOCAL, 0, stcp->width,
+                               &stcp->hlrec, NULL, fillclick ? &clickrec : NULL, stcp);
   xfree(stc);
 
   if (fillclick) {
     stl_clear_click_defs(wp->w_statuscol_click_defs, wp->w_statuscol_click_defs_size);
-    wp->w_statuscol_click_defs = stl_alloc_click_defs(wp->w_statuscol_click_defs, width,
-                                                      &wp->w_statuscol_click_defs_size);
+    wp->w_statuscol_click_defs
+      = stl_alloc_click_defs(wp->w_statuscol_click_defs, width, &wp->w_statuscol_click_defs_size);
     stl_fill_click_defs(wp->w_statuscol_click_defs, clickrec, buf, width, false);
   }
 
@@ -915,8 +909,8 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
 
   // If "fmt" was set insecurely it needs to be evaluated in the sandbox.
   // "opt_idx" will be kOptInvalid when caller is nvim_eval_statusline().
-  const bool use_sandbox = (opt_idx != kOptInvalid) ? was_set_insecurely(wp, opt_idx, opt_scope)
-                                                    : false;
+  const bool use_sandbox
+    = (opt_idx != kOptInvalid) ? was_set_insecurely(wp, opt_idx, opt_scope) : false;
 
   // When the format starts with "%!" then evaluate it as an expression and
   // use the result as the actual format string.
@@ -994,8 +988,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       stl_groupitems = xrealloc(stl_groupitems, sizeof(int) * new_len);
       stl_hltab = xrealloc(stl_hltab, sizeof(stl_hlrec_t) * (new_len + 1));
       stl_tabtab = xrealloc(stl_tabtab, sizeof(StlClickRecord) * (new_len + 1));
-      stl_separator_locations =
-        xrealloc(stl_separator_locations, sizeof(int) * new_len);
+      stl_separator_locations = xrealloc(stl_separator_locations, sizeof(int) * new_len);
 
       stl_items_len = new_len;
     }
@@ -1341,8 +1334,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       if (name != NULL) {
         xstrlcpy(NameBuff, name, MAXPATHL);
       } else {
-        char *t = (opt == STL_FULLPATH) ? wp->w_buffer->b_ffname
-                                        : wp->w_buffer->b_fname;
+        char *t = (opt == STL_FULLPATH) ? wp->w_buffer->b_ffname : wp->w_buffer->b_fname;
         home_replace(wp->w_buffer, t, NameBuff, MAXPATHL, true);
       }
       trans_characters(NameBuff, MAXPATHL);
@@ -1354,7 +1346,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       break;
     }
 
-    case STL_VIM_EXPR:     // '{'
+    case STL_VIM_EXPR:  // '{'
     {
       char *block_start = fmt_p - 1;
       bool reevaluate = (*fmt_p == '%');
@@ -1367,11 +1359,11 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       // Attempt to copy the expression to evaluate into
       // the output buffer as a null-terminated string.
       char *t = out_p;
-      while ((*fmt_p != '}' || (reevaluate && fmt_p[-1] != '%'))
-             && *fmt_p != NUL && out_p < out_end_p) {
+      while ((*fmt_p != '}' || (reevaluate && fmt_p[-1] != '%')) && *fmt_p != NUL
+             && out_p < out_end_p) {
         *out_p++ = *fmt_p++;
       }
-      if (*fmt_p != '}') {          // missing '}' or out of space
+      if (*fmt_p != '}') {  // missing '}' or out of space
         break;
       }
       fmt_p++;
@@ -1428,8 +1420,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
 
       // If the output of the expression needs to be evaluated
       // replace the %{} block with the result of evaluation
-      if (reevaluate && str != NULL && *str != NUL
-          && strchr(str, '%') != NULL
+      if (reevaluate && str != NULL && *str != NUL && strchr(str, '%') != NULL
           && evaldepth < MAX_STL_EVAL_DEPTH) {
         size_t parsed_usefmt = (size_t)(block_start - usefmt);
         size_t str_length = strlen(str);
@@ -1489,8 +1480,9 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       colnr_T virtcol = wp->w_virtcol + 1;
       // Don't display %V if it's the same as %c.
       if (opt == STL_VIRTCOL_ALT
-          && (virtcol == (colnr_T)((State & MODE_INSERT) == 0 && empty_line
-                                   ? 0 : (int)wp->w_cursor.col + 1))) {
+          && (virtcol
+              == (colnr_T)((State & MODE_INSERT) == 0 && empty_line ? 0
+                                                                    : (int)wp->w_cursor.col + 1))) {
         break;
       }
       num = virtcol;
@@ -1541,11 +1533,10 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       base = kNumBaseHexadecimal;
       FALLTHROUGH;
     case STL_OFFSET: {
-      int l = ml_find_line_or_offset(wp->w_buffer, wp->w_cursor.lnum, NULL,
-                                     false);
+      int l = ml_find_line_or_offset(wp->w_buffer, wp->w_cursor.lnum, NULL, false);
       num = (wp->w_buffer->b_ml.ml_flags & ML_EMPTY) || l < 0
-            ? 0 : l + 1 + ((State & MODE_INSERT) == 0 && empty_line
-                           ? 0 : (int)wp->w_cursor.col);
+              ? 0
+              : l + 1 + ((State & MODE_INSERT) == 0 && empty_line ? 0 : (int)wp->w_cursor.col);
       break;
     }
     case STL_BYTEVAL_X:
@@ -1578,7 +1569,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
 
     case STL_FOLDCOL:    // 'C' for 'statuscolumn'
     case STL_SIGNCOL: {  // 's' for 'statuscolumn'
-stcsign:
+    stcsign:
       if (stcp == NULL) {
         break;
       }
@@ -1628,10 +1619,8 @@ stcsign:
       // Copy the filetype if it is not null and the formatted string will fit
       // in the temporary buffer
       // (including the brackets and null terminating character)
-      if (*wp->w_buffer->b_p_ft != NUL
-          && strlen(wp->w_buffer->b_p_ft) < TMPLEN - 3) {
-        vim_snprintf(buf_tmp, sizeof(buf_tmp), "[%s]",
-                     wp->w_buffer->b_p_ft);
+      if (*wp->w_buffer->b_p_ft != NUL && strlen(wp->w_buffer->b_p_ft) < TMPLEN - 3) {
+        vim_snprintf(buf_tmp, sizeof(buf_tmp), "[%s]", wp->w_buffer->b_p_ft);
         str = buf_tmp;
       }
       break;
@@ -1641,8 +1630,7 @@ stcsign:
       // Copy the filetype if it is not null and the formatted string will fit
       // in the temporary buffer
       // (including the comma and null terminating character)
-      if (*wp->w_buffer->b_p_ft != NUL
-          && strlen(wp->w_buffer->b_p_ft) < TMPLEN - 2) {
+      if (*wp->w_buffer->b_p_ft != NUL && strlen(wp->w_buffer->b_p_ft) < TMPLEN - 2) {
         vim_snprintf(buf_tmp, sizeof(buf_tmp), ",%s", wp->w_buffer->b_p_ft);
         // Uppercase the file extension
         for (char *t = buf_tmp; *t != 0; t++) {
@@ -1668,21 +1656,26 @@ stcsign:
     case STL_MODIFIED:
     case STL_MODIFIED_ALT:
       itemisflag = true;
-      switch ((opt == STL_MODIFIED_ALT)
-              + bufIsChanged(wp->w_buffer) * 2
+      switch ((opt == STL_MODIFIED_ALT) + bufIsChanged(wp->w_buffer) * 2
               + (!MODIFIABLE(wp->w_buffer)) * 4) {
       case 2:
-        str = "[+]"; break;
+        str = "[+]";
+        break;
       case 3:
-        str = ",+"; break;
+        str = ",+";
+        break;
       case 4:
-        str = "[-]"; break;
+        str = "[-]";
+        break;
       case 5:
-        str = ",-"; break;
+        str = ",-";
+        break;
       case 6:
-        str = "[+-]"; break;
+        str = "[+-]";
+        break;
       case 7:
-        str = ",+-"; break;
+        str = ",+-";
+        break;
       }
       break;
 
@@ -1719,9 +1712,7 @@ stcsign:
       //  and the proper conditions are met
       char *t = str;
       if (itemisflag) {
-        if ((t[0] && t[1])
-            && ((!prevchar_isitem && *t == ',')
-                || (prevchar_isflag && *t == ' '))) {
+        if ((t[0] && t[1]) && ((!prevchar_isitem && *t == ',') || (prevchar_isflag && *t == ' '))) {
           t++;
         }
         prevchar_isflag = true;
@@ -1781,8 +1772,7 @@ stcsign:
       for (; *t && out_p < out_end_p; t++) {
         // Change a space by fillchar, unless fillchar is '-' and a
         // digit follows.
-        if (fillable && *t == ' '
-            && (!ascii_isdigit(*(t + 1)) || fillchar != '-')) {
+        if (fillable && *t == ' ' && (!ascii_isdigit(*(t + 1)) || fillchar != '-')) {
           schar_get_adv(&out_p, fillchar);
         } else {
           *out_p++ = *t;
@@ -1805,7 +1795,7 @@ stcsign:
       // Otherwise if the item is a number, copy that to the output buffer.
     } else if (num >= 0) {
       if (out_p + 20 > out_end_p) {
-        break;                  // not sufficient space
+        break;  // not sufficient space
       }
       prevchar_isitem = true;
 
@@ -1881,7 +1871,7 @@ stcsign:
     }
 
     if (num >= 0 || (!itemisflag && str && *str)) {
-      prevchar_isflag = false;              // Item not NULL, but not a flag
+      prevchar_isflag = false;  // Item not NULL, but not a flag
     }
 
     // Only free the string buffer if we allocated it.
@@ -2049,8 +2039,7 @@ stcsign:
     // If we have separated groups, then we deal with it now
     if (num_separators) {
       int standard_spaces = (maxwidth - width) / num_separators;
-      int final_spaces = (maxwidth - width) -
-                         standard_spaces * (num_separators - 1);
+      int final_spaces = (maxwidth - width) - standard_spaces * (num_separators - 1);
 
       for (int l = 0; l < num_separators; l++) {
         int dislocation = (l == (num_separators - 1)) ? final_spaces : standard_spaces;
@@ -2062,8 +2051,7 @@ stcsign:
           schar_get_adv(&s, fillchar);
         }
 
-        for (int item_idx = stl_separator_locations[l] + 1;
-             item_idx < itemcnt + evalstart;
+        for (int item_idx = stl_separator_locations[l] + 1; item_idx < itemcnt + evalstart;
              item_idx++) {
           stl_items[item_idx].start += dislocation;
         }
@@ -2083,9 +2071,10 @@ stcsign:
         sp->start = stl_items[l].start;
         sp->userhl = stl_items[l].minwid;
         unsigned type = stl_items[l].type;
-        sp->item = type == HighlightSign ? STL_SIGNCOL : type ==
-                   HighlightFold ? STL_FOLDCOL : type ==
-                   HighlightCombining ? STL_HIGHLIGHT_COMB : 0;
+        sp->item = type == HighlightSign        ? STL_SIGNCOL
+                   : type == HighlightFold      ? STL_FOLDCOL
+                   : type == HighlightCombining ? STL_HIGHLIGHT_COMB
+                                                : 0;
         sp++;
       }
     }
